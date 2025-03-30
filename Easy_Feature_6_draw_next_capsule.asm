@@ -633,6 +633,7 @@ game_loop:
     
     responses_to_keys:
     li $t4, 0x00000000
+    li $t5, 0xFFFFFFFF
     lw $t0, is_paused
     li $t1, 1
     bne $t0, $t1, check_for_keys_normal
@@ -847,7 +848,11 @@ game_loop:
 	# check whether the move is valid
 	addi $t3, $s3, 128
 	lw $t1, 0($t3)
+	beq $t1, $t5, respond_to_S_continue
 	bne $t1, $t4, check_landing	
+    addi $t9, $s3, 128
+    lw $t9, 0($t9)
+	beq $t9, $t5, check_landing	
 	j respond_to_S_continue
 
 	respond_to_S_Type2:
@@ -857,12 +862,15 @@ game_loop:
 	lw $t1, 0($t3)
 	bne $t0, $t4, check_landing
 	bne $t1, $t4, check_landing
+	beq $t0, $t5, check_landing
+	beq $t1, $t5, check_landing
 	j respond_to_S_continue
 
 	respond_to_S_Type3:
 	addi $t2, $s2, 128
 	lw $t0, 0($t2)
 	bne $t0, $t4, check_landing
+	beq $t0, $t5, check_landing
 	j respond_to_S_continue
 
 	respond_to_S_Type4:
@@ -872,6 +880,8 @@ game_loop:
 	lw $t1, 0($t3)
 	bne $t0, $t4, check_landing
 	bne $t1, $t4, check_landing
+	beq $t0, $t5, check_landing
+	beq $t1, $t5, check_landing
 	j respond_to_S_continue
 	
 
@@ -898,12 +908,15 @@ game_loop:
 
 
 	respond_to_A_Type1:
+	li $t5, 0xFFFFFFFF
 	addi $t2, $s2, -4
 	addi $t3, $s3, -4
 	lw $t0, 0($t2)
 	lw $t1, 0($t3)
 	bne $t0, $t4, check_landing
 	bne $t1, $t4, check_landing
+	beq $t0, $t5, check_landing
+	beq $t1, $t5, check_landing
 	j respond_to_A_continue	
 
 	
@@ -911,6 +924,7 @@ game_loop:
 	addi $t3, $s3, -4
 	lw $t1, 0($t3)
 	bne $t1, $t4, check_landing
+	beq $t1, $t5, check_landing
 	j respond_to_A_continue	
 
 	
@@ -921,6 +935,8 @@ game_loop:
 	lw $t1, 0($t3)
 	bne $t0, $t4, check_landing
 	bne $t1, $t4, check_landing
+	beq $t0, $t5, check_landing
+	beq $t1, $t5, check_landing
 	j respond_to_A_continue	
 
 	
@@ -928,11 +944,19 @@ game_loop:
 	addi $t2, $s2, -4
 	lw $t0, 0($t2)
 	bne $t0, $t4, check_landing
+	beq $t0, $t5, check_landing
 	j respond_to_A_continue	
 
 
 	respond_to_A_continue:
 	# if valid
+	move $a0, $s3
+	li $a1, 0xFFFFFFFF
+	jal calculate_outline_offsets
+	move $a1, $a0
+	move $a0, $s3
+	li $a2, 0x00000000
+	jal draw_outline
 	sw $t4, 0($s2)	# cover previous in black
 	sw $t4, 0($s3)	# cover previous in black
 	addi $s2, $s2, -4
@@ -961,12 +985,15 @@ game_loop:
 	lw $t1, 0($t3)
 	bne $t0, $t4, check_landing
 	bne $t1, $t4, check_landing
+	beq $t0, $t5, check_landing
+	beq $t1, $t5, check_landing
 	j respond_to_D_continue
 	
 	respond_to_D_Type2:
 	addi $t2, $s2, 4
 	lw $t0, 0($t2)
 	bne $t0, $t4, check_landing
+	beq $t0, $t5, check_landing
 	j respond_to_D_continue
 
 
@@ -977,6 +1004,8 @@ game_loop:
 	lw $t1, 0($t3)
 	bne $t0, $t4, check_landing
 	bne $t1, $t4, check_landing
+	beq $t0, $t5, check_landing
+	beq $t1, $t5, check_landing
 	j respond_to_D_continue
 	
 
@@ -984,11 +1013,19 @@ game_loop:
 	addi $t3, $s3, 4
 	lw $t1, 0($t3)
 	bne $t1, $t4, check_landing	
+	beq $t1, $t5, check_landing	
 	j respond_to_D_continue
 
 
 	respond_to_D_continue:
 	# if valid
+	move $a0, $s3
+	li $a1, 0xFFFFFFFF
+	jal calculate_outline_offsets
+	move $a1, $a0
+	move $a0, $s3
+	li $a2, 0x00000000
+	jal draw_outline
 	sw $t4, 0($s2)	# cover previous in black
 	sw $t4, 0($s3)	# cover previous in black
 	addi $s2, $s2, 4
@@ -1002,6 +1039,7 @@ game_loop:
 	addi $t2, $s2, 4
 	lw $t0, 0($t2)
 	bne $t0, $t4, check_landing
+	beq $t0, $t5, check_landing
 
 	# if valid
 	sw $t4, 0($s2)	# cover previous in black
@@ -1022,6 +1060,7 @@ game_loop:
 	addi $t3, $s3, 128
 	lw $t1, 0($t3)
 	bne $t1, $t4, check_landing
+	beq $t1, $t5, check_landing
 
 	# if valid
 	sw $t4, 0($s2)	# cover previous in black
@@ -1039,6 +1078,7 @@ game_loop:
 	addi $t3, $s3, 4
 	lw $t1, 0($t3)
 	bne $t1, $t4, check_landing
+	beq $t1, $t5, check_landing
 
 	# if valid
 	sw $t4, 0($s2)	# cover previous in black
@@ -1059,6 +1099,7 @@ game_loop:
 	addi $t2, $s2, 128
 	lw $t0, 0($t2)
 	bne $t0, $t4, check_landing
+	beq $t0, $t5, check_landing
 	
 	sw $t4, 0($s3)
 	addi $s3, $s2, 128
@@ -1139,11 +1180,47 @@ game_loop:
 	li $t9, 4
 	beq $t8, $t9, check_landing_Type4
 	j check_for_walls
+	
+	calculate_outline_offsets:
+	li $t0, 0
+	move $t1, $a1
+	move $t2, $a0
+	addi $t2, $t2, 128
+	calculate_offsets_while_start:
+	lw $t3, 0($t2)
+	bne $t3, $t1, calculate_offsets_while_end
+	addi $t0, $t0, 1
+	addi $t2, $t2, 128
+	j calculate_offsets_while_start
+	calculate_offsets_while_end:
+	move $a0, $t0
+	jr $ra
+	
+	draw_outline:
+	li $t0, 0
+	move $t1, $a2
+	addi $a0, $a0, 128
+	draw_outline_while_start:
+	sw $t1, 0($a0)
+	addi $t0, $t0, 1
+	addi $a0, $a0, 128
+	bne $t0, $a1, draw_outline_while_start
+	jr $ra
+	
     
 	check_landing_Type1:
+	li $t5, 0xFFFFFFFF
 	addi $t0, $s3, 128
 	lw $t1, 0($t0)
+	beq $t1, $t5, game_loop
 	bne $t1, $t4, check_landing_continue
+	move $a0, $s3
+	li, $a1, 0x00000000
+	jal calculate_outline_offsets
+	move $a1, $a0
+	move $a0, $s3
+	li $a2, 0xFFFFFFFF
+	jal draw_outline
 	j game_loop
 	
 	check_landing_Type2:
