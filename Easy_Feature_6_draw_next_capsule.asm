@@ -55,7 +55,7 @@ virus_count:
 speed_increase_time:
     .word 5000
 next_capsule:
-    .space 8
+    .space 40
 
 
 ##############################################################################
@@ -152,11 +152,28 @@ main:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	jal generate_new_capsule
-	lw $ra, 0($sp)
-	addi $sp, $sp, 4
 	la $t0, next_capsule
 	sw $a0, 0($t0)
 	sw $a1, 4($t0)
+	jal generate_new_capsule
+	addi $t0, $t0, 8
+	sw $a0, 0($t0)
+	sw $a1, 4($t0)
+	jal generate_new_capsule
+	addi $t0, $t0, 8
+	sw $a0, 0($t0)
+	sw $a1, 4($t0)
+	jal generate_new_capsule
+	addi $t0, $t0, 8
+	sw $a0, 0($t0)
+	sw $a1, 4($t0)
+	jal generate_new_capsule
+	addi $t0, $t0, 8
+	sw $a0, 0($t0)
+	sw $a1, 4($t0)
+	
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
 	jr $ra
 	
 	draw_virus:
@@ -205,7 +222,6 @@ main:
 	sw $a0, 0($t0)
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
-	jal store_next_capsule
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
 	j draw_next_capsule_on_side_panel
@@ -213,17 +229,49 @@ main:
 	jr $ra
 
     draw_next_capsule_on_side_panel:
+    li $t0, 0
+    li $t1, 4
+    la $t2, next_capsule
+    la $t3, next_capsule
+    addi $t3, $t3, 8
+    update_preview_while_start:
+    lw $t4, 0($t3)
+    lw $t5, 4($t3)
+    sw $t4, 0($t2)
+    sw $t5, 4($t2)
+    addi $t2, $t2, 8
+    addi $t3, $t3, 8
+    addi $t0, $t0, 1
+    bne $t0, $t1, update_preview_while_start
+    addi $sp, $sp, -4
+    sw $t2, 0($sp)
+    addi $sp, $sp, -4
+    sw $ra, 0($sp)
+    jal generate_new_capsule
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4
+    lw $t2, 0($sp)
+    addi $sp, $sp, 4
+    sw $a0, 0($t2)
+    sw $a1, 4($t2)
+    
+    
     lw $t0, ADDR_DSPL
     addi $t0, $t0, 484
     la $t1, next_capsule
+    li $t3, 0
+    li $t4, 5
+    draw_capsules_while_start:
     lw $t2, 0($t1)
     sw $t2, 0($t0)
     addi $t0, $t0, 128
     lw $t2, 4($t1)
     sw $t2, 0($t0)
+    addi $t0, $t0, 384
+    addi $t1, $t1, 8
+    addi $t3, $t3, 1
+    bne $t3, $t4, draw_capsules_while_start
     j after_draw_next_capsule
-    
-    
 
 	# Draw the first two-halved capsule
     generate_new_capsule:
