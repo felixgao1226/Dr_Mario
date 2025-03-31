@@ -1565,6 +1565,8 @@ game_loop:
     j set_change
 
 	set_change:
+	jal erase_s2
+	jal erase_s3
 	lw $t9, s2_change
 	bne $t9, $zero, change_s2
 	after_change_s2:
@@ -1781,143 +1783,7 @@ lw $t2, 0($a0)
 add $t3, $t3, $a1
 li $t4, 0x00000000
 sw $t4, 0($t3)
-# move $s7, $t3
-
-# lw $t8, state
-# li $t9, 1
-# beq $t8, $t9, normal_remove_line
-# li $t9, 3
-# beq $t8, $t9, normal_remove_line
-
-
-# check_for_unsupported_blocks:
-# # dealing with unsupported blocks
-# addi $sp, $sp, -4
-# sw $t4, 0($sp)
-# addi $sp, $sp, -4
-# sw $t3, 0($sp)
-# addi $sp, $sp, -4
-# sw $t2, 0($sp)
-# addi $sp, $sp, -4
-# sw $t1, 0($sp)
-# addi $sp, $sp, -4
-# sw $t0, 0($sp)
-# addi $sp, $sp, -4
-# sw $a1, 0($sp)
-# addi $sp, $sp, -4
-# sw $a0, 0($sp)
-# addi $sp, $sp, -4
-# sw $ra, 0($sp)
-# move $a0, $s7
-# # update the state to Type 1
-# li $t0, 1
-# sw $t0, is_dropped
-# jal calculate_drop_offset
-# move $a1, $a0
-# move $a0, $s7
-# beq $a0, $zero, normal_remove_line
-
-# jal drop_blocks_by_offsets
-
-# lw $ra, 0($sp)
-# addi $sp, $sp, 4
-# lw $a0, 0($sp)
-# addi $sp, $sp, 4
-# lw $a1, 0($sp)
-# addi $sp, $sp, 4
-# lw $t0, 0($sp)
-# addi $sp, $sp, 4
-# lw $t1, 0($sp)
-# addi $sp, $sp, 4
-# lw $t2, 0($sp)
-# addi $sp, $sp, 4
-# lw $t3, 0($sp)
-# addi $sp, $sp, 4
-# lw $t4, 0($sp)
-# addi $sp, $sp, 4
-# normal_remove_line:
-
-
 addi $t1, $t1, 1
 blt $t1, $t0, remove_line_while_start 
 jr $ra
 
-# # if the current capsule if vertical
-# lw $t8, state
-# li $t9, 1
-# beq $t8, $t9, last_vertical_block_cancelled
-# li $t9, 3
-# beq $t8, $t9, last_vertical_block_cancelled
-# j remove_finished
-
-# last_vertical_block_cancelled:
-# addi $sp, $sp, -4
-# sw $ra, 0($sp)
-# addi $sp, $sp, -4
-# sw $a0, 0($sp)
-# move $a0, $s7
-# jal calculate_drop_offset
-# move $a1, $a0
-# lw $a0, 0($sp)
-# addi $sp, $sp, 4
-# jal drop_blocks_by_offsets
-# lw $ra, 0($sp)
-# addi $sp, $sp, 4
-# remove_finished:
-
-
-
-# calculate_drop_offset:
-# ####################################
-# ## The calculate drop offset function ##
-# ####################################
-# # Input parameters:
-# # - $a0: the block we are about to cancel
-# ####################################
-# # we want to find the offset 
-# li $t0, 128
-# li $t3, 1
-# li $t2, 20
-# move $t9, $a0
-# li $t1, 0x00000000
-# addi $t9, $t9, -128
-# calculate_drop_offset_while_start:
-# lw $t8, 0($t9)
-# beq $t3, $t2, return_back
-# beq $t8, $t1, increment_offset
-# return_back:
-# move $a0, $t0
-# jr $ra
-# increment_offset:
-# addi $t0, $t0, 128
-# addi $t9, $t9, -128
-# addi $t3, $t3, 1
-# j calculate_drop_offset_while_start
-
-
-
-# drop_blocks_by_offsets:
-# ####################################
-# ## The drop blocks by offsets function ##
-# ####################################
-# # Input parameters:
-# # - $a0: the block we are about to cancel
-# # - $a1: the offset we want all the unsupported blocks to drop by
-# ####################################
-# li $t0, 0x00000000
-# li $t7, 0
-# li $t9, 20
-# move $t1, $a0
-# drop_blocks_while_start:
-# addi $t1, $t1, -128
-# lw $t2, 0($t1)
-# beq $t7, $t9, return_drop_offsets
-# bne $t2, $t0, apply_offset
-# return_drop_offsets:
-# jr $ra
-# apply_offset:
-# sw $t0, 0($t1)     # color the unsupported block to black
-# add $t3, $t1, $a1  # apply the offset and store the value to $t3
-# sw $t2, 0($t3)
-# addi $t7, $t7, 1
-# j drop_blocks_while_start
